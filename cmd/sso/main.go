@@ -16,7 +16,7 @@ const (
 
 func main() {
 	log := setupLogger("1")
-	time := time2.Duration(1000)
+	time := time2.Duration(100000000000000)
 	conString := "user=postgres password=2005 dbname=petProjBybit sslmode=disable"
 	application := app.New(log, 8000, conString, time)
 	application.GRPCServer.MustRun()

@@ -36,44 +36,54 @@ func New(log *slog.Logger, userInterface UserStorage, appProvider AppProvider, t
 }
 func (a *Auth) RegisterNewUser(ctx context.Context, email string, pass string) (int64, error) {
 	const op = "Auth.RegisterNewUser"
-	log := a.log.With(slog.String("op", op), slog.String("email", email))
+	fmt.Println("come to register new user")
+	//log := a.log.With(slog.String("op", op), slog.String("email", email))
+	fmt.Println(1)
 
-	log.Info("register user")
+	//log.Info("register user")
 
 	passHash, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
+	fmt.Println(2)
 	if err != nil {
-		log.Error("faliled to generate password hash")
+		fmt.Println("err to generate password")
+		//log.Error("faliled to generate password hash")
 		return 0, fmt.Errorf("%s, %w", op, err)
 	}
+	fmt.Println(3)
 	id, err := a.userInterface.SaveUser(ctx, email, passHash)
 	if err != nil {
-		log.Error("faliled to save user")
+		fmt.Println("err to save user")
+		//log.Error("faliled to save user")
 		return 0, fmt.Errorf("%s, %w", op, err)
 	}
+	fmt.Println("save user", id)
 	return id, nil
 }
 
 func (a *Auth) Login(ctx context.Context, email string, pass string, appID int) (string, error) {
 	const op = "Auth.Login"
-	log := a.log.With(slog.String("op", op), slog.String("email", email))
-	log.Info("attemting to login user")
+	fmt.Println("come to login")
+	//log := a.log.With(slog.String("op", op), slog.String("email", email))
+	//log.Info("attemting to login user")
 
 	user, err := a.userInterface.User(ctx, email)
-	if err != nil {
-		log.Error("faliled to get user")
-	}
+	//if err != nil {
+	//	log.Error("faliled to get user")
+	//}
 	if err := bcrypt.CompareHashAndPassword(user.PassHash, []byte(pass)); err != nil {
-		log.Error("faliled to compare password")
+		fmt.Println("err to compare password")
+		//log.Error("faliled to compare password")
 		return "", fmt.Errorf("%s", op)
 	}
 	app, err := a.appProvider.App(ctx, int64(appID))
-	if err != nil {
-		log.Error("faliled to get app")
-	}
-	log.Info("login sucsess")
+	//if err != nil {
+	//	log.Error("faliled to get app")
+	//}
+	//log.Info("login sucsess")
 	token, err := jwt.NewToken(user, app, a.tokenTTL)
 	if err != nil {
-		a.log.Error("failed to generate token")
+		fmt.Println("err to create token")
+		//a.log.Error("failed to generate token")
 
 		return "", fmt.Errorf("%s: %w", op, err)
 	}

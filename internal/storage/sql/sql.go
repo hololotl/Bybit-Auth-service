@@ -15,6 +15,7 @@ func New(storagePath string) (*Storage, error) {
 	const op = "storage.sqlite.New"
 	db, err := sql.Open("postgres", storagePath)
 	if err != nil {
+		fmt.Println(err.Error())
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -24,14 +25,13 @@ func New(storagePath string) (*Storage, error) {
 func (s *Storage) SaveUser(ctx context.Context, email string, passHash []byte) (int64, error) {
 	const op = "storage.sqlite.SaveUser"
 	//TODO validate email for unique value
-	r, err := s.db.Exec("INSERT INTO users (email, pass_hash) VALUES ($1, $2)", email, passHash)
-	if err != nil {
-		return 0, fmt.Errorf("%s: %w", op, err)
+	var id int64
+	r := s.db.QueryRow("INSERT INTO users (email, pass_hash) VALUES ($1, $2) returning id", email, passHash).Scan(&id)
+	if r != nil {
+		fmt.Println(r)
+		return 0, fmt.Errorf("%s: %w", op, r)
 	}
-	id, err := r.LastInsertId()
-	if err != nil {
-		return 0, fmt.Errorf("%s: %w", op, err)
-	}
+
 	return id, nil
 }
 
